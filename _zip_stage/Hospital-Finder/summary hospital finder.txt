@@ -1,0 +1,845 @@
+HOSPITAL FINDER PROJECT DOCUMENTATION
+Chapter Three: Methodology / System Analysis and Design
+Chapter Four: System Implementation and Testing
+Chapter Five: Conclusion and Recommendations
+
+Project Title: Hospital Finder
+Project Type: Web-based location intelligence and emergency support system
+Technology Platform: Next.js (React + TypeScript), Tailwind CSS, Google Maps APIs, third-party geolocation and emergency services APIs
+Deployment Context: Cloud-hosted web application (Vercel)
+
+====================================================================
+CHAPTER THREE: METHODOLOGY / SYSTEM ANALYSIS AND DESIGN
+====================================================================
+
+3.1 Introduction to System Analysis
+
+System analysis is the process of studying an existing problem domain, understanding user needs, identifying system limitations, and designing a practical and scalable solution. For this project, the problem domain is emergency healthcare access, specifically the challenge of finding nearby hospitals quickly during urgent situations.
+
+Hospital Finder was analyzed and designed as an emergency-support web platform that:
+- Detects user location automatically.
+- Allows manual location input via search.
+- Identifies nearby hospitals.
+- Displays route guidance and map/list views.
+- Retrieves emergency dispatch numbers by country.
+
+The analysis process focused on four key goals:
+1. Reduce the time required for a user to find medical facilities.
+2. Improve accessibility on mobile and desktop devices.
+3. Ensure graceful fallback when key APIs are unavailable.
+4. Keep the architecture modular and maintainable.
+
+The system analysis and design activities considered:
+- Functional behavior (what the system must do).
+- Non-functional behavior (performance, reliability, usability).
+- Data flow between browser, internal API routes, and external services.
+- Interface behavior under normal and degraded network/service conditions.
+
+
+3.2 Research Methodology (Where Applicable)
+
+The methodology used in this project is applied design research with iterative prototyping and validation.
+
+Research approach:
+- Exploratory stage:
+  Identified the user pain point: in emergencies, people may not know nearby hospitals or emergency contact codes.
+- Comparative analysis:
+  Studied behavior of map-based service applications and emergency lookup systems.
+- Incremental prototyping:
+  Built the solution in modules (location acquisition, emergency lookup, nearby hospitals, map rendering, directions).
+- Validation through scenario testing:
+  Tested key user scenarios such as permission denial, missing API keys, and unavailable external services.
+
+Methodological model:
+- User requirement elicitation.
+- Problem decomposition.
+- System design specification.
+- Implementation in modular components.
+- Functional and basic performance evaluation.
+- Continuous refinement.
+
+This methodology is suitable because:
+- Requirements are practical and user-centered.
+- The project depends on multiple external services with variable availability.
+- Iterative testing is necessary for robust behavior under edge cases.
+
+
+3.3 Description of the Existing System
+
+Before the proposed system, users often relied on:
+- Manual web searches for nearby hospitals.
+- Generic map applications without emergency-focused workflow.
+- Inconsistent emergency contact information by country.
+
+Limitations in the existing approach:
+1. Search friction:
+   Users must manually search, compare, and select facilities while under stress.
+2. No integrated emergency context:
+   Emergency numbers are not always immediately visible.
+3. Location dependency issues:
+   Some users deny location permission or devices fail to provide coordinates.
+4. Inconsistent reliability:
+   External mapping failures can lead to blank maps or limited guidance.
+5. High cognitive load:
+   Emergency users need fast, minimal-step interfaces.
+
+Observed gap:
+There was no unified lightweight emergency-oriented interface combining location detection, hospital discovery, route support, and emergency dispatch display.
+
+
+3.4 The Proposed System
+
+The proposed system is Hospital Finder, a responsive web application designed to provide immediate hospital discovery and emergency support.
+
+Core capabilities:
+- Auto geolocation using browser geolocation API.
+- Manual location override through place search.
+- Nearby hospital retrieval through server-side API route proxy.
+- Interactive Google map display (when available).
+- Fallback list-mode operation when map API is disabled/unavailable.
+- Country-based emergency dispatch number retrieval.
+- Persistent emergency number display using localStorage.
+
+Functional modules in the implemented system:
+1. UI composition module:
+   Navbar, Hero, Maps, Feature, Contact, Footer.
+2. Location module:
+   User geolocation + optional fallback coordinates + manual override.
+3. Hospital data module:
+   Fetch and normalize nearby places data.
+4. Emergency data module:
+   Resolve country code and fetch emergency number.
+5. API abstraction module:
+   Internal routes for places and emergency data.
+6. Routing/visualization module:
+   Map markers, info windows, directions rendering.
+
+Fallback strategy already implemented:
+- If Google Maps JavaScript usage is disabled or key unavailable, application continues in list mode.
+- If Google Places API fails, system returns synthetic fallback hospitals near user coordinates.
+- If geolocation fails, system defaults to fallback coordinates (Nairobi).
+
+
+3.5 Significance and Challenges of the Proposed System
+
+Significance:
+1. Emergency readiness:
+   Reduces response delay by surfacing nearby hospitals immediately.
+2. Accessibility:
+   Works across devices with responsive layout.
+3. Global adaptability:
+   Emergency lookup based on detected country.
+4. Robustness:
+   Multiple fallback layers maintain partial service continuity.
+5. Educational and societal value:
+   Demonstrates practical integration of real-time APIs for health support use cases.
+
+Challenges encountered:
+1. Dependency on external APIs:
+   Google APIs and emergency API uptime affects data quality.
+2. API key availability and quota limitations.
+3. Browser geolocation permission denial.
+4. Data inconsistency across providers (geocoding vs reverse geocoding outputs).
+5. Need to preserve user experience during degraded conditions.
+
+Challenge mitigation implemented:
+- API proxy routes with validation and structured error handling.
+- Conditional operation modes (map mode vs list mode).
+- Fallback generated hospitals when provider fails.
+- Country code fallback via OpenStreetMap reverse geocoding if Google key is absent.
+- localStorage persistence for emergency number display.
+
+
+3.6 Data Collection
+
+Data collection in this project is API-driven and event-driven.
+
+Collected data categories:
+1. Geospatial user input data:
+   - Latitude and longitude from browser geolocation.
+   - Latitude and longitude from manual address search geocoding.
+2. Healthcare location data:
+   - Hospital names.
+   - Coordinates.
+   - Vicinity text.
+   - Ratings.
+   - Open/closed indicator.
+3. Emergency communication data:
+   - Country code.
+   - Dispatch numbers from emergency number provider.
+4. Interaction data (runtime state):
+   - Selected hospital.
+   - Route destination.
+   - Current zoom state.
+
+Data collection channels:
+- Browser APIs (navigator.geolocation).
+- Google geocoding and places endpoints.
+- OpenStreetMap reverse endpoint (Nominatim).
+- Emergency Number API endpoint.
+- Browser storage (localStorage) for transient persistence.
+
+Privacy and data responsibility:
+- No custom user account data is stored.
+- No relational user profile database is implemented.
+- Location is used for immediate functional output, not long-term user profiling.
+
+
+3.7 Data Set Collection (If Applicable)
+
+This project does not use a static machine-learning dataset.
+Instead, it uses dynamic, request-time datasets from external service providers.
+
+Applicable data source summary:
+1. Google Places API response dataset (nearby hospitals).
+2. Google Geocoding API response dataset (address/country resolution).
+3. Nominatim reverse geocoding response dataset (country code fallback).
+4. Emergency Number API response dataset (dispatch codes).
+
+Reason this is acceptable:
+- The system is an online location information system, not a predictive model.
+- Real-time data freshness is more valuable than static offline datasets.
+
+
+3.8 System Design (Structural Design, Database Design and Specification, Interface Design)
+
+3.8.1 Structural Design
+
+The system follows a client-server hybrid frontend architecture with internal API routes:
+- Client layer:
+  React components, hooks, interactive map rendering.
+- Application route layer:
+  Next.js API routes for /api/places and /api/emergency.
+- External service layer:
+  Google Maps services, Emergency Number API, IP geolocation endpoint, Nominatim.
+
+Structural decomposition:
+- Presentation components:
+  Navbar, Hero, Feature, Contact, Footer.
+- Interactive mapping component:
+  Maps.
+- Data hooks:
+  useUserLocation, useHospitalData, useIpLocation (auxiliary).
+- Utility logic:
+  getEmergencyDisplayCode.
+
+3.8.2 Database Design and Specification
+
+Current implementation database model:
+- No traditional persistent database (MySQL/PostgreSQL/MongoDB) is used.
+- The application is effectively stateless from server perspective.
+- Temporary client persistence:
+  localStorage key: emergencyNumber.
+
+Data specification entities (conceptual, non-persistent):
+
+Entity: UserLocation
+- lat: number
+- lng: number
+- source: geolocation | manual-search | fallback
+
+Entity: Hospital
+- name: string
+- lat: number
+- lng: number
+- vicinity?: string
+- rating?: number
+- open?: boolean
+- placeId?: string
+
+Entity: EmergencyInfo
+- countryISO: string
+- displayNumber: string
+
+Entity: RouteState
+- selectedHospitalIndex?: number
+- routeDestination?: {lat, lng}
+- directionsResult?: google.maps.DirectionsResult
+
+3.8.3 Interface Design
+
+Design principles used:
+1. Minimal steps:
+   User should find hospitals in as few interactions as possible.
+2. Clarity under stress:
+   High-contrast CTA buttons and clear section titles.
+3. Progressive disclosure:
+   Summary list + detailed map info window.
+4. Responsiveness:
+   Desktop split-pane and mobile stacked layout.
+5. Context continuity:
+   Emergency code shown in navigation and emergency contact section.
+
+Interface sections:
+- Navbar:
+  Branding, navigation links, emergency number badge/button.
+- Hero:
+  Location search input and Find Hospitals action.
+- Maps section:
+  User marker, hospital markers, info windows, directions.
+- Feature section:
+  System capability highlights.
+- Contact section:
+  One-tap emergency call link.
+- Footer:
+  Copyright and closing information.
+
+
+3.9 Design Methodology (Materials and Method)
+
+Materials:
+- Software framework: Next.js with App Router.
+- Language: TypeScript + JavaScript runtime in browser/Node.
+- Styling: Tailwind CSS + global CSS variables.
+- Mapping library: @react-google-maps/api.
+- Icon library: react-icons.
+- Hosting environment: Vercel (production target).
+
+Method:
+1. Requirement identification:
+   Emergency hospital discovery with direction support.
+2. Component-driven UI design:
+   Developed reusable components for consistency.
+3. Hook-based state logic:
+   Extracted location and hospital retrieval into custom hooks.
+4. API encapsulation:
+   External calls wrapped by internal API endpoints for control.
+5. Fallback-first resilience:
+   Ensured critical output remains available during outages.
+6. Iterative test cycles:
+   Repeated manual scenario testing and behavior refinement.
+
+Rationale for this design methodology:
+- Supports modular development and maintainability.
+- Matches real-time data nature of location services.
+- Encourages graceful degradation and user trust.
+
+
+3.10 System Architecture
+
+Architecture pattern:
+- Layered web architecture with client orchestration and server route mediation.
+
+Architecture layers:
+1. Presentation Layer:
+   React components and Tailwind styling.
+2. Application Logic Layer:
+   Hooks and utility functions for data transformation.
+3. API Mediation Layer:
+   Next.js route handlers /api/places and /api/emergency.
+4. External Data Layer:
+   Google APIs, emergency number service, IP geolocation, OSM reverse geocoding.
+
+Runtime flow summary:
+1. User opens site.
+2. Location resolved (browser geolocation or override/fallback).
+3. Country code inferred via geocoding/reverse-geocoding.
+4. Emergency number fetched and persisted in localStorage.
+5. Nearby hospitals fetched through internal places route.
+6. UI displays list and map markers.
+7. User selects hospital and requests route directions.
+
+Reliability architecture notes:
+- Degraded mode without Google JS map.
+- Synthetic fallback hospitals when place query fails.
+- Input validation for coordinate query params in places route.
+
+
+3.11 System UML Implementation
+
+The UML below describes implemented behavior conceptually.
+
+A. Use Case Model (Textual)
+Actors:
+- User
+- External APIs (Google Places/Geocode, Emergency API, OSM)
+
+Use cases:
+1. Detect current location.
+2. Search location manually.
+3. View nearby hospitals.
+4. View hospital details and status.
+5. Get route directions.
+6. View emergency dispatch number.
+7. Place emergency call.
+
+B. Activity Flow (Textual)
+1. Start application.
+2. Check manual override input.
+3. If override exists, use override coordinates.
+4. Else request browser geolocation.
+5. If geolocation fails, use fallback coordinates.
+6. Resolve country code.
+7. Fetch emergency data and save display value.
+8. Fetch nearby hospitals from internal route.
+9. If map mode enabled and loaded, render map.
+10. Else render list-mode fallback.
+11. User selects hospital and optionally requests directions.
+12. End (continuous interaction loop).
+
+C. Sequence Model (Textual)
+User -> Hero: Submit location query
+Hero -> Google Geocode API: address to lat/lng
+Hero -> Page state: setOverrideLocation
+Page -> Maps: pass overrideLocation
+Maps -> useUserLocation: resolve final location
+Maps -> useHospitalData: request hospital + emergency info
+useHospitalData -> /api/emergency: fetch by country code
+useHospitalData -> /api/places: fetch hospitals by lat/lng
+/api/places -> Google Places API or fallback generator
+useHospitalData -> Maps: return normalized hospital list
+Maps -> User: render markers/cards and directions actions
+
+D. Component Relationship Model (Textual)
+Home
+- Navbar
+- Hero (writes override location)
+- Maps (reads resolved location + hospital data)
+- Feature
+- Contact
+- Footer
+
+Maps
+- useUserLocation
+- useHospitalData
+- HospitalCard
+
+useHospitalData
+- getEmergencyDisplayCode
+- /api/emergency
+- /api/places
+
+
+3.12 Performance Evaluation Metrics (If Applicable)
+
+Because this is a web information system, applicable metrics include latency, availability behavior, and interaction responsiveness.
+
+Proposed/observed metrics:
+1. Time to first usable output:
+   Time from page load to first visible hospital list/map state.
+2. API response latency:
+   /api/places and /api/emergency request duration.
+3. Fallback activation success rate:
+   Percentage of failed external calls recovered by fallback output.
+4. User interaction completion time:
+   Time from entering location to selecting a hospital direction.
+5. Frontend responsiveness:
+   UI remains interactive while asynchronous requests execute.
+6. Map rendering stability:
+   Correct marker rendering and direction route overlay.
+
+Qualitative performance observations:
+- System maintains utility even when map rendering is disabled.
+- Fallback hospitals prevent empty-state dead ends.
+- Emergency information can be cached locally for quick redisplay.
+
+
+====================================================================
+CHAPTER FOUR: SYSTEM IMPLEMENTATION AND TESTING
+====================================================================
+
+4.1 Introduction
+
+This chapter explains how the designed system was translated into a functional web application, including language choices, module implementation, deployment process, requirements compliance, and testing outcomes.
+
+The implementation follows modular frontend engineering practices and route-based backend logic within Next.js.
+
+
+4.2 Language Implementation
+
+Implemented languages and technologies:
+1. TypeScript:
+   Used for typed React components, hooks, and API route handlers.
+2. JavaScript runtime:
+   Executes in browser and Node.js server runtime for Next.js routes.
+3. CSS (Tailwind + global CSS):
+   Used for styling, responsive layout, theming variables.
+4. JSON:
+   Data interchange format for API request/response bodies.
+
+Module-level language usage:
+- UI components:
+  TSX files in src/app/components.
+- Hooks and utility logic:
+  TS files in src/app/hooks and src/app/utils.
+- API handlers:
+  TS route files in src/app/api.
+
+
+4.3 Choice of Programming Language
+
+Primary language choice: TypeScript (on top of JavaScript)
+
+Reasons:
+- Type safety for API data parsing.
+- Better maintainability in a multi-module project.
+- Strong compatibility with React and Next.js.
+- Improved developer productivity through editor tooling and static checks.
+
+Support language choice: CSS/Tailwind
+- Enables responsive and utility-first styling.
+- Supports rapid UI iteration.
+
+
+4.4 Language Justification
+
+TypeScript was justified in this project because:
+1. External APIs can return variable structures; typed interfaces reduce runtime mistakes.
+2. Hooks and component props require clear contracts.
+3. Refactoring across multiple files is safer with static type checking.
+4. Educational value: demonstrates modern enterprise frontend engineering practices.
+
+Next.js (framework-level language environment) is justified because:
+1. Provides app routing and API routes in one codebase.
+2. Simplifies deployment pipeline.
+3. Supports both client-side interactivity and server-side endpoint control.
+
+
+4.5 Requirement Specification (Functional and Non-Functional Requirements)
+
+4.5.1 Functional Requirements
+
+FR1: The system shall obtain user coordinates from browser geolocation.
+FR2: The system shall accept manual location input and geocode it.
+FR3: The system shall retrieve nearby hospital records by coordinates.
+FR4: The system shall show hospital data in card format.
+FR5: The system shall display hospital markers on map when map mode is enabled.
+FR6: The system shall allow selecting a hospital to view summary details.
+FR7: The system shall provide route direction request capability.
+FR8: The system shall fetch emergency dispatch number by country code.
+FR9: The system shall display emergency number in navbar/contact section.
+FR10: The system shall support fallback outputs when external APIs fail.
+
+4.5.2 Non-Functional Requirements
+
+NFR1: Usability
+- Simple and clear UI for stressed users.
+
+NFR2: Performance
+- Fast asynchronous fetching and rendering for practical use.
+
+NFR3: Reliability
+- Graceful fallback when API keys or services are missing.
+
+NFR4: Portability
+- Must run on modern browsers across desktop and mobile.
+
+NFR5: Maintainability
+- Modular component and hook architecture.
+
+NFR6: Scalability
+- Architecture should allow adding filters, saved hospitals, and analytics later.
+
+
+4.6 System Implementation and Deployment
+
+4.6.1 Implementation Overview
+
+The application is implemented in Next.js App Router structure:
+- Page composition: src/app/page.tsx
+- Root layout and font setup: src/app/layout.tsx
+- API routes:
+  - src/app/api/places/route.ts
+  - src/app/api/emergency/route.ts
+- UI components:
+  src/app/components/*
+- Shared UI primitives:
+  src/app/components/common/*
+- Hooks:
+  src/app/hooks/*
+- Utility:
+  src/app/utils/getEmergencyDisplayCode.ts
+
+Key implementation highlights:
+1. Location handling:
+   useUserLocation resolves location with override support and geolocation fallback.
+2. Hospital retrieval:
+   useHospitalData fetches from /api/places and maps response into local Hospital type.
+3. Emergency retrieval:
+   useHospitalData resolves country code then calls /api/emergency.
+4. Visualization:
+   Maps component handles marker state, info windows, and directions rendering.
+5. Emergency call readiness:
+   Contact component renders tel: link from stored emergency number.
+
+4.6.2 Deployment
+
+Configured for standard Next.js deployment pipeline:
+- Development: npm run dev
+- Production build: npm run build
+- Production serve: npm run start
+- Hosting target: Vercel platform
+
+Environment variable requirements:
+- NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+- Optional behavior flag: NEXT_PUBLIC_USE_GOOGLE_MAPS=true
+
+Deployed behavior modes:
+- Full map mode: with API key and map flag enabled.
+- List fallback mode: without map mode or with map load error.
+
+
+4.7 System Requirement
+
+4.7.1 Hardware Requirements (Minimum)
+- Processor: Dual-core CPU
+- RAM: 4 GB minimum (8 GB recommended for development)
+- Storage: At least 1 GB free for project and dependencies
+- Internet: Required for API calls and map services
+
+4.7.2 Software Requirements
+- Operating System: Windows/Linux/macOS (cross-platform)
+- Runtime: Node.js (LTS recommended)
+- Package manager: npm (or yarn/pnpm)
+- Browser: Chrome/Edge/Firefox/Safari (modern versions)
+- IDE: VS Code recommended
+
+4.7.3 External Service Requirements
+- Google Maps API key for geocoding/maps/places full capability
+- Emergency Number API availability
+- Optional fallback provider access (OpenStreetMap reverse geocode)
+
+
+4.8 System Evaluation
+
+Evaluation perspective:
+- Functional correctness.
+- User experience in emergency workflow.
+- Resilience under failure conditions.
+
+Findings from implementation behavior:
+1. Functional correctness:
+   Core actions (location detection, hospital fetch, emergency number display) are implemented and integrated.
+2. User workflow efficiency:
+   Hero search to map/list result is direct and minimal-step.
+3. Resilience:
+   Application provides alternative output paths under key/API failure scenarios.
+4. Interface responsiveness:
+   Mobile and desktop layouts are supported.
+
+Current limitations observed:
+- No internal persistence database for history or analytics.
+- No automated test suite currently documented in repository.
+- Emergency display utility currently focuses on dispatch fallback logic and could be extended for richer country response formats.
+
+
+4.9 Software Development and Testing Tools (If Applicable)
+
+Development tools used:
+1. VS Code:
+   Source editing, project navigation, debugging.
+2. Node.js + npm:
+   Runtime and dependency management.
+3. Next.js CLI scripts:
+   Development server, build and start commands.
+4. ESLint:
+   Static linting (configured via eslint config).
+5. Browser DevTools:
+   Network/API inspection and UI responsiveness checks.
+6. Vercel deployment tools:
+   Hosting and production preview.
+
+Testing tools/methods used in practical implementation:
+- Manual scenario-based testing.
+- API response inspection through browser network tools.
+- UI behavior checks across states and screen sizes.
+
+
+4.10 System Testing and Documentation
+
+4.10.1 Testing Strategy
+
+Testing was conducted using black-box functional scenarios and state-based UI validation.
+
+4.10.2 Sample Test Cases
+
+Test Case 1: Geolocation success
+- Input: User grants geolocation permission.
+- Expected: Nearby hospitals displayed; map centers on user.
+- Observed: Implemented flow supports this.
+
+Test Case 2: Geolocation denied
+- Input: User blocks geolocation.
+- Expected: Fallback coordinates used, hospitals still shown.
+- Observed: useUserLocation fallback handles this.
+
+Test Case 3: Manual location search
+- Input: User types valid location in Hero.
+- Expected: Coordinates override set, map/list updates.
+- Observed: Implemented via onLocationSelect callback.
+
+Test Case 4: Missing Google Maps key
+- Input: API key absent.
+- Expected: Application still returns fallback hospitals from /api/places and list mode usability retained.
+- Observed: Implemented behavior confirms this.
+
+Test Case 5: Emergency API success
+- Input: Valid country code.
+- Expected: Emergency number stored and displayed.
+- Observed: localStorage value consumed by Navbar and Contact.
+
+Test Case 6: Emergency API failure
+- Input: API unavailable or invalid code.
+- Expected: Error handled gracefully without app crash.
+- Observed: try/catch and route-level error responses present.
+
+Test Case 7: Directions request
+- Input: User clicks Get Directions on a hospital.
+- Expected: Route rendered when map mode active.
+- Observed: DirectionsService + DirectionsRenderer flow implemented.
+
+4.10.3 Documentation Coverage
+
+Documentation artifacts produced/available:
+- Project README (existing, high-level).
+- This comprehensive chaptered technical report.
+- Source-level self-descriptive module naming and structure.
+
+
+4.11 Results and Discussion (If Applicable)
+
+Results:
+1. A complete web-based emergency hospital finder was implemented.
+2. Core emergency workflow is operational:
+   detect/search location -> fetch hospitals -> display options -> navigate.
+3. Emergency dispatch lookup is integrated by country.
+4. System includes fallback modes for improved robustness.
+
+Discussion:
+- The project demonstrates practical integration of multiple APIs in a user-focused healthcare support context.
+- Architectural decisions (hooks + route handlers + component composition) improve readability and maintainability.
+- Reliance on external APIs introduces uncertainty, but fallback logic significantly reduces total service failure.
+- The system is suitable as a final-year implementation because it combines analysis, design, software engineering, API integration, and testing considerations in one coherent product.
+
+
+====================================================================
+CHAPTER FIVE: CONCLUSION AND RECOMMENDATIONS
+====================================================================
+
+5.1 Conclusion
+
+This project successfully delivers a functional, responsive, and resilience-aware Hospital Finder system. The developed solution addresses a real-world emergency access challenge by combining geolocation, healthcare place discovery, emergency dispatch lookup, and route visualization.
+
+The implementation demonstrates:
+- Strong modular frontend engineering.
+- Effective use of TypeScript for safer code contracts.
+- Practical API orchestration through internal routes.
+- User-centered design with mobile responsiveness and clear actions.
+- Operational fallback mechanisms for reliability under partial failure.
+
+Overall, the project meets its central objective: reducing user effort and time in identifying nearby hospitals and emergency contact information.
+
+
+5.2 Recommendation
+
+Recommended next improvements:
+1. Add persistent backend storage:
+   Save search history, frequently used hospitals, and usage analytics.
+2. Add automated testing:
+   Unit tests (hooks/utils), integration tests (API routes), and end-to-end tests (critical user flows).
+3. Improve emergency number logic:
+   Expand parsing to show ambulance/fire/police options where available.
+4. Add hospital filtering:
+   By rating, availability, specialty, and distance thresholds.
+5. Improve accessibility:
+   ARIA enhancements, keyboard navigation, and multilingual support.
+6. Add offline-aware behavior:
+   Cache last-known results and emergency contacts.
+7. Integrate health authority datasets:
+   Verified hospital metadata and live operational status where possible.
+
+
+5.3 Contribution to Knowledge
+
+Academic and practical contributions of this work:
+1. Provides a reproducible model for emergency-focused location-aware web applications.
+2. Demonstrates resilience design via graceful fallback in API-dependent systems.
+3. Shows effective modular decomposition using hooks, components, and route handlers.
+4. Contributes a practical case study in applied software engineering for healthcare support systems.
+5. Bridges system analysis and real implementation with measurable user-centered outcomes.
+
+
+====================================================================
+REFERENCES (APA 7)
+====================================================================
+
+Emergency Number API. (n.d.). Emergency numbers by country API. https://emergencynumberapi.com/
+
+Google. (n.d.). Geocoding API. Google Maps Platform Documentation. https://developers.google.com/maps/documentation/geocoding
+
+Google. (n.d.). Places API. Google Maps Platform Documentation. https://developers.google.com/maps/documentation/places
+
+Google. (n.d.). Directions API. Google Maps Platform Documentation. https://developers.google.com/maps/documentation/directions
+
+Next.js Team. (n.d.). Next.js documentation. https://nextjs.org/docs
+
+OpenStreetMap Foundation. (n.d.). Nominatim usage documentation. https://nominatim.org/release-docs/latest/
+
+React Team. (n.d.). React documentation. https://react.dev/
+
+Vercel. (n.d.). Vercel platform documentation. https://vercel.com/docs
+
+
+====================================================================
+APPENDIX
+====================================================================
+
+Appendix A: Data Collection Instrument
+
+A1. Functional Scenario Checklist (Manual Test Instrument)
+
+Instrument type: Structured observation checklist
+Purpose: Validate end-to-end emergency hospital discovery workflow
+
+Checklist fields:
+- Date/time of test
+- Browser/device used
+- Network condition (stable/unstable)
+- Geolocation permission status
+- API key status (present/absent)
+- Input location value (if manual)
+- Hospital results returned (count)
+- Emergency code displayed (yes/no/value)
+- Directions function result (success/failure)
+- Fallback triggered (yes/no and reason)
+- Final remarks
+
+A2. User-Flow Observation Form
+
+Task 1: Open application and detect location
+- Completion time (seconds)
+- Success/failure
+
+Task 2: Search manual location
+- Completion time
+- Correct result relevance
+
+Task 3: Select a hospital and request directions
+- Route displayed yes/no
+- Number of steps taken
+
+Task 4: Access emergency call information
+- Visibility score (1-5)
+- Link usability score (1-5)
+
+A3. API Reliability Observation Log
+
+Log columns:
+- Endpoint name
+- Request timestamp
+- Response status
+- Response time (ms)
+- Error details (if any)
+- Fallback activation state
+
+A4. Suggested Quantitative Metrics Table for Final Defense
+
+- Mean time-to-hospital-result (seconds)
+- Geolocation success rate (%)
+- API failure recovery rate (%)
+- Direction rendering success rate (%)
+- Emergency code retrieval success rate (%)
+- Mobile usability satisfaction score
+
+
+END OF DOCUMENT
